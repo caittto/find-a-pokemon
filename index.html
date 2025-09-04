@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Find the Pokémon</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Find A Pokémon</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="game-board"></div>
-<div id="score">Score: 0</div>
-<div id="level">Level: 1</div>
-<div id="target">Find: ???</div>
-<div id="celebration"></div>
-<div id="level-timer"></div>
+  <div id="game-board"></div>
 
-<script src="game.js"></script>
+  <!-- HUD -->
+  <div id="hud">
+    <div id="score">Score: 0</div>
+    <div id="level">Level: 1</div>
+    <div id="highlevel">Highest Level: 1</div>
+  </div>
+
+  <div id="target">Find: ???</div>
+  <div id="celebration"></div>
+  <div id="level-timer"></div>
+
+  <!-- Music Toggle Button -->
+  <button id="music-toggle">🔊</button>
+
+  <!-- Background Music -->
+  <audio id="bg-music"></audio>
+
+  <script src="game.js"></script>
 </body>
 </html>
-
