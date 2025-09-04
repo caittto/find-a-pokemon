@@ -7,7 +7,7 @@ const celebrationOverlay = document.getElementById('celebration');
 const timerElement = document.getElementById('level-timer');
 
 let score = 0;
-let level = 33;
+let level = 1;
 let highLevel = localStorage.getItem('highLevel') || 1; 
 let pokemonObjects = [];
 let levelTimer = null;
@@ -113,7 +113,7 @@ function enterCursedMode() {
   targetDisplay.style.color = '#FF3333';
 
   // Play cursed music
-  const cursedMusic = new Audio('music/cursed pokemon for game.wav');
+  const cursedMusic = new Audio('c_music/cursed pokemon for game.mp3');
   cursedMusic.volume = 0.25;
   cursedMusic.loop = true;
   cursedMusic.play().catch(()=>{});
@@ -252,9 +252,9 @@ startGame();
 
 // --- Background Music Setup ---
 const musicFiles = [
-  { src: 'music/collectingsnailshells2 orch.wav', loop: false, repeat: 1 },
-  { src: 'music/ancientmedalion orch.wav', loop: false, repeat: 3 },
-  { src: 'music/islandfromabove2 orch.wav', loop: false, repeat: 1 },
+  { src: 'music/collectingsnailshells2 orch.mp3', loop: false, repeat: 1 },
+  { src: 'music/ancientmedalion orch.mp3', loop: false, repeat: 3 },
+  { src: 'music/islandfromabove2 orch.mp3', loop: false, repeat: 1 },
 ];
 
 let currentMusicIndex = 0;
@@ -348,4 +348,3 @@ document.addEventListener('click', () => {
     playNextTrack();
   }
 }, { once: true });
-
