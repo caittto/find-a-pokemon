@@ -1,16 +1,19 @@
 const board = document.getElementById('game-board');
 const scoreDisplay = document.getElementById('score');
 const levelDisplay = document.getElementById('level');
+const highlevelDisplay = document.getElementById('highlevel'); 
 const targetDisplay = document.getElementById('target');
 const celebrationOverlay = document.getElementById('celebration');
 const timerElement = document.getElementById('level-timer');
 
 let score = 0;
-let level = 1;
-let baseSpeed = 0.5; // starting speed
+let level = 33;
+let highLevel = localStorage.getItem('highLevel') || 1; 
 let pokemonObjects = [];
 let levelTimer = null;
+let cursedModeActive = false;
 
+// Normal Pokémon lists
 const easyPokemon = ['bulbasaur','charmander','squirtle','pikachu','eevee','jigglypuff'];
 const mediumPokemon = ['clefairy','meowth','psyduck','snorlax'];
 const hardPokemon = [
@@ -25,13 +28,22 @@ const hardPokemon = [
   'omastar','kabuto','kabutops','aerodactyl','dragonair','dragonite','mewtwo','mew'
 ];
 
+// Cursed Pokémon (optional visuals, normal sprites for now)
+const cursedPokemon = ['bulbasaur','ivysaur','venusaur','charmander','charmeleon','charizard',
+    'squirtle','wartortle','blastoise','pikachu','raichu','eevee','jigglypuff','snorlax'
+];
+
 function getCurrentPokemonList() {
-  if (level <= 5) return easyPokemon;
-  if (level <= 10) return easyPokemon.concat(mediumPokemon);
-  return easyPokemon.concat(mediumPokemon).concat(hardPokemon);
+  if(level < 6) return easyPokemon;
+  if(level < 11) return easyPokemon.concat(mediumPokemon);
+  if(level < 33) return easyPokemon.concat(mediumPokemon).concat(hardPokemon);
+  return easyPokemon.concat(mediumPokemon).concat(hardPokemon); // same list but cursed mode aesthetics applied
 }
 
-function getSprite(name) { return `https://play.pokemonshowdown.com/sprites/gen5/${name}.png`; }
+function getSprite(name) {
+    return `https://play.pokemonshowdown.com/sprites/gen5/${name}.png`;
+}
+
 function randomItem(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
 function randomOtherThan(arr, exclude) { return randomItem(arr.filter(x=>x!==exclude)); }
 
@@ -86,9 +98,47 @@ function getNonOverlappingPosition(existingPositions, width, height, boardWidth,
   return {x,y};
 }
 
+// --- Cursed Mode ---
+function enterCursedMode() {
+  if(cursedModeActive) return;
+  cursedModeActive = true;
+
+  // Add shake effect
+  const shakeElements = [board, targetDisplay, scoreDisplay, levelDisplay, highlevelDisplay];
+  shakeElements.forEach(el => el.classList.add('brutal-shake'));
+  setTimeout(() => shakeElements.forEach(el => el.classList.remove('brutal-shake')), 800);
+
+  // Aesthetic change
+  board.style.backgroundColor = '#0c0c0c';
+  targetDisplay.style.color = '#FF3333';
+
+  // Play cursed music
+  const cursedMusic = new Audio('music/cursed pokemon for game.wav');
+  cursedMusic.volume = 0.25;
+  cursedMusic.loop = true;
+  cursedMusic.play().catch(()=>{});
+
+  window.cursedMusicAudio = cursedMusic;
+}
+
+// --- Game Loop ---
 function startGame(){
   board.innerHTML='';
   pokemonObjects=[];
+
+  // Trigger cursed mode at level 33
+  if(level >= 33 && !cursedModeActive){
+    enterCursedMode();
+  }
+  if(level < 33 && cursedModeActive){
+    cursedModeActive = false;
+    board.style.backgroundColor = '#dfe6eb';
+    targetDisplay.style.color = '#FFCC00';
+    if(window.cursedMusicAudio){
+      window.cursedMusicAudio.pause();
+      window.cursedMusicAudio = null;
+    }
+  }
 
   const currentList = getCurrentPokemonList();
   const totalImages = Math.min(3 + level, 20);
@@ -99,6 +149,10 @@ function startGame(){
 
   board.style.position='relative';
   const boardRect=board.getBoundingClientRect();
+
+  // Speed factor (resets each game)
+  let speedFactor = Math.min(level * 0.05, 1.5); // cap speed at level 30
+  if(level === 1) speedFactor = 0.25;
 
   for(let i=0;i<totalImages;i++){
     const img = document.createElement('img');
@@ -122,18 +176,16 @@ function startGame(){
     img.style.left = `${pos.x}px`;
     img.style.top = `${pos.y}px`;
 
-    // Speed increases slightly with level
-    const speedMultiplier = 1 + (level-1) * 0.05;
-    const dx = (Math.random()-0.5) * baseSpeed * speedMultiplier;
-    const dy = (Math.random()-0.5) * baseSpeed * speedMultiplier;
+    const dx = (Math.random()-0.5) * speedFactor;
+    const dy = (Math.random()-0.5) * speedFactor;
 
     pokemonObjects.push({el:img,x:pos.x,y:pos.y,dx,dy});
 
     img.addEventListener('click', ()=>{
       if(img.dataset.correct==='true'){
         clearInterval(levelTimer);
-        score+=10;
-        level+=1;
+        score +=10;
+        level +=1;
         if(level % 10 === 0){
           celebrateConfetti();
           showCelebration(`🎉 Level ${level}! 🎉`);
@@ -143,22 +195,19 @@ function startGame(){
       } else {
         clearInterval(levelTimer);
         showCelebration('💥 Wrong Pokémon! Game Over 💥');
-        score=0;
-        level=1;
-        baseSpeed = 0.5; // Reset speed on fail
+        score = 0;
+        level = 1; 
         updateDisplay();
         startGame();
       }
     });
   }
 
-  // Start timer if level >=10
   if(level >= 10){
     startTimer(10, ()=>{
       showCelebration('⏰ Time\'s up! Game Over ⏰');
       score=0;
       level=1;
-      baseSpeed = 0.5; // Reset speed on timeout
       updateDisplay();
       startGame();
     });
@@ -187,6 +236,116 @@ function startGame(){
 function updateDisplay(){
   scoreDisplay.textContent = `Score: ${score}`;
   levelDisplay.textContent = `Level: ${level}`;
+
+  if(level > highLevel){
+    highLevel = level;
+    localStorage.setItem('highLevel', highLevel);
+  }
+  if(highlevelDisplay) highlevelDisplay.textContent = `Highest Level: ${highLevel}`;
 }
 
 startGame();
+
+
+
+
+
+// --- Background Music Setup ---
+const musicFiles = [
+  { src: 'music/collectingsnailshells2 orch.wav', loop: false, repeat: 1 },
+  { src: 'music/ancientmedalion orch.wav', loop: false, repeat: 3 },
+  { src: 'music/islandfromabove2 orch.wav', loop: false, repeat: 1 },
+];
+
+let currentMusicIndex = 0;
+let currentRepeat = 0;
+let musicAudio = new Audio();
+musicAudio.volume = 0; // start muted for autoplay
+musicAudio.muted = true; // allows autoplay in most browsers
+const targetVolume = 0.25; // reduced background volume
+const fadeDuration = 2000; // 2 seconds fade in/out
+
+// Shuffle array helper
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// Fade function
+function fadeAudio(toVolume, duration, callback) {
+  const startVolume = musicAudio.volume;
+  const stepTime = 50; // ms
+  const steps = duration / stepTime;
+  let stepCount = 0;
+
+  const fadeInterval = setInterval(() => {
+    stepCount++;
+    musicAudio.volume = startVolume + (toVolume - startVolume) * (stepCount / steps);
+    if (stepCount >= steps) {
+      musicAudio.volume = toVolume;
+      clearInterval(fadeInterval);
+      if (callback) callback();
+    }
+  }, stepTime);
+}
+
+// Play next track
+function playNextTrack() {
+  if (musicFiles.length === 0) return;
+
+  const track = musicFiles[currentMusicIndex];
+  musicAudio.src = track.src;
+  musicAudio.loop = false; // handle repeats manually
+  currentRepeat++;
+
+  // Fade in only for first play of this track
+  if (currentRepeat === 1) fadeAudio(targetVolume, fadeDuration);
+
+  // Play the audio
+  musicAudio.play().catch(e => {
+    console.log("Autoplay blocked. Click anywhere to start music.");
+  });
+
+  // Schedule fade-out before the track ends
+  musicAudio.onloadedmetadata = () => {
+    const fadeOutStart = musicAudio.duration - (track.loop || currentRepeat < (track.repeat || 1) ? 0 : fadeDuration / 1000);
+    if (fadeOutStart > 0) {
+      setTimeout(() => fadeAudio(0, fadeDuration), fadeOutStart * 1000);
+    }
+  };
+
+  musicAudio.onended = () => {
+    if (track.loop || currentRepeat < (track.repeat || 1)) {
+      // Repeat same track immediately without fade-in
+      musicAudio.play();
+    } else {
+      currentMusicIndex++;
+      if (currentMusicIndex >= musicFiles.length) {
+        shuffleArray(musicFiles); // reshuffle after finishing all tracks
+        currentMusicIndex = 0;
+      }
+      currentRepeat = 0;
+      playNextTrack();
+    }
+  };
+}
+
+// Shuffle initially
+shuffleArray(musicFiles);
+
+// Attempt autoplay on load
+window.addEventListener('load', () => {
+  musicAudio.muted = false; // unmute for fade-in
+  playNextTrack();
+});
+
+// Fallback: allow user to click anywhere to start music if autoplay blocked
+document.addEventListener('click', () => {
+  if (musicAudio.paused) {
+    musicAudio.muted = false;
+    playNextTrack();
+  }
+}, { once: true });
+
