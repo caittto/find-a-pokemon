@@ -1,103 +1,107 @@
 body {
-    margin: 0;
-    font-family: 'Pokemon', sans-serif;
-    background-color: #dfe6eb;
-    overflow: hidden;
+  margin: 0;
+  font-family: 'Pokemon', sans-serif;
+  background-color: #dfe6eb;
+  overflow: hidden;
 }
 
 #game-board {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
 }
 
-#score, #level, #target {
-    position: absolute;
-    top: 10px;
-    font-size: 24px;
-    font-weight: bold;
-    color: rgb(15, 15, 15);
-    text-shadow: 2px 2px #ffffff;
-    
-}
-/*
-#score { left: 10px; }
-#level { left: 150px; }
-#target { left: 300px; }
-*/
-#celebration {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 30px;
-    font-weight: bold;
-    color: #FFCC00;
-    text-shadow: 2px 2px #000;
-    z-index: 1000;
+/* HUD styling */
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
 }
 
-#level-timer {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    left: auto;
-    font-size: 40px;
-    font-weight: bold;
-    color: #FFCC00;
-    background-color: #eef1f3;
-    padding: 5px 10px;
-    border-radius: 10px;
-    border: 3px solid rgb(15, 15, 15);
-    z-index: 100;
+#score, #level, #highlevel {
+  font-size: 24px;
+  font-weight: bold;
+  color: rgb(15, 15, 15);
+  text-shadow: 2px 2px #ffffff;
+  margin-bottom: 4px;
 }
 
-/* Font */
-@font-face {
-    font-family: 'Pokemon';
-    src: url('fonts/my-font.ttf') format('truetype');
-}
-
-body, #level-timer, #celebration {
-    font-family: 'Pokemon', sans-serif;
-    letter-spacing: 0.001px; /* adjust the value as needed */
-    text-shadow: 2px 2px #000;  
+#highlevel {
+  font-size: 0.8em;
+  color: #0075BE;
+  text-shadow: 1px 1px #fff;
+  margin-top: 10px;
 }
 
 #target {
-    font-family: 'Pokemon', sans-serif;
-    letter-spacing: 0.001px; /* adjust the value as needed */
-    color: #FFCC00;
-    text-shadow: 2px 2px #3d30b4;  
-    margin-top: 5px;
-    margin-bottom: 100px;
-    margin-right: 500px;
-    margin-left: 750px;
+  position: absolute;
+  top: 10px;
+  left: 750px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #FFCC00;
+  text-shadow: 2px 2px #3d30b4;
 }
-
-#level {
-    font-family: 'Pokemon', sans-serif;
-    letter-spacing: 0.001px; /* adjust the value as needed */
-    text-shadow: 2px 2px #ffffff;  
-    margin-top: 5px;
-    margin-bottom: 100px;
-    margin-right: 1500px;
-    margin-left: 15px;
-}
-
-#score {
-    font-family: 'Pokemon', sans-serif;
-    letter-spacing: 1px; /* adjust the value as needed */
-    text-shadow: 2px 2px #ffffff;  
-    margin-top: 5px;
-    margin-bottom: 100px;
-    margin-right: 1500px;
-    margin-left: 200px;
-}
-
 
 #celebration {
-    line-height: 1.5;
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
+  font-weight: bold;
+  color: #FFCC00;
+  text-shadow: 2px 2px #000;
+  z-index: 1000;
 }
 
+#level-timer {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 40px;
+  font-weight: bold;
+  color: #FFCC00;
+  background-color: #eef1f3;
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: 3px solid rgb(15, 15, 15);
+  z-index: 100;
+}
+
+/* Fonts */
+@font-face {
+  font-family: 'Pokemon';
+  src: url('fonts/my-font.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'PokemonCursed';
+  src: url('fonts/POKPIX1.ttf') format('truetype');
+}
+
+body, #level-timer, #celebration {
+  font-family: 'Pokemon', sans-serif;
+  letter-spacing: 0.001px;
+  text-shadow: 2px 2px #000;
+}
+
+@keyframes brutal-shake {
+  0% { transform: translate(0px, 0px) rotate(0deg); }
+  10% { transform: translate(-10px, -10px) rotate(-5deg); }
+  20% { transform: translate(10px, -10px) rotate(5deg); }
+  30% { transform: translate(-10px, 10px) rotate(-5deg); }
+  40% { transform: translate(10px, 10px) rotate(5deg); }
+  50% { transform: translate(-10px, -10px) rotate(-5deg); }
+  60% { transform: translate(10px, -10px) rotate(5deg); }
+  70% { transform: translate(-10px, 10px) rotate(-5deg); }
+  80% { transform: translate(10px, 10px) rotate(5deg); }
+  90% { transform: translate(-5px, -5px) rotate(-2deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+.brutal-shake {
+  animation: brutal-shake 0.8s ease-in-out;
+}
